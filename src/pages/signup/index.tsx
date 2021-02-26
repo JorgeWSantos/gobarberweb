@@ -4,7 +4,7 @@ import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { Container, Content, Background } from './styles';
-import AuthContext from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 import Logo from '../../assets/logo.svg';
 import Input from '../../components/input';
 import Button from '../../components/button';
