@@ -1,5 +1,10 @@
-import React, { createContext, useCallback } from 'react';
+import React, { createContext, useCallback, useState } from 'react';
 import api from '../services/api';
+
+interface AuthState {
+  token: string;
+  user: Object;
+}
 
 interface SignInCredentials {
   email: string;
@@ -7,7 +12,7 @@ interface SignInCredentials {
 }
 
 interface AuthContextData {
-  name: string;
+  user: object;
   // eslint-disable-next-line no-unused-vars
   signIn(credentials: SignInCredentials): Promise<void>;
 }
@@ -17,6 +22,14 @@ export const AuthContext = createContext<AuthContextData>(
 );
 
 export const AuthProvider: React.FC = ({ children }) => {
+  const [data, setData] = useState<AuthState>(() => {
+    const token = localStorage.getItem('@GoBarber:token');
+    const user = localStorage.getItem('@GoBarber:user');
+
+    if (token && user) return { token, user: JSON.parse(user) };
+
+    return {} as AuthState;
+  });
   const signIn = useCallback(async ({ email, password }) => {
     try {
       const response = await api.post('sessions', {
@@ -24,14 +37,19 @@ export const AuthProvider: React.FC = ({ children }) => {
         password,
       });
 
-      console.log(response.data);
+      const { user, token } = response.data;
+
+      localStorage.setItem('@GoBarber:token', token);
+      localStorage.setItem('@GoBarber:user', JSON.stringify(user));
+
+      setData({ token, user });
     } catch (error) {
       console.log(error);
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ name: 'Jorge', signIn }}>
+    <AuthContext.Provider value={{ user: data.user, signIn }}>
       {children}
     </AuthContext.Provider>
   );
